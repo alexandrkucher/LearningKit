@@ -40,6 +40,8 @@
   <ItemGroup>
     <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
+    <ClCompile Include="Interrupt.c" />
+    <ClCompile Include="IOCTL.c" />
     <ClCompile Include="Queue.c" />
   </ItemGroup>
   <ItemGroup>

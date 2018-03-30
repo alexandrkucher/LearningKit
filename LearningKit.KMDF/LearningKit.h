@@ -58,4 +58,42 @@ LearningKitKMDFQueueInitialize(
 	_In_ WDFDEVICE Device
 );
 
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+LearningKitSetPowerPolicy(
+	_In_ WDFDEVICE Device
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+SelectInterfaces(
+	_In_ WDFDEVICE Device
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+OsrFxConfigContReaderForInterruptEndPoint(
+	_In_ PDEVICE_CONTEXT DeviceContext
+);
+
+EVT_WDF_USB_READER_COMPLETION_ROUTINE OsrFxEvtUsbInterruptPipeReadComplete;
+EVT_WDF_USB_READERS_FAILED OsrFxEvtUsbInterruptReadersFailed;
+
+VOID
+OsrUsbIoctlGetInterruptMessage(
+	_In_ WDFDEVICE Device,
+	_In_ NTSTATUS ReaderStatus
+);
+
 EXTERN_C_END
+
+FORCEINLINE
+GUID
+DeviceToActivityId(
+	_In_ WDFDEVICE Device
+)
+{
+	GUID activity = { 0 };
+	RtlCopyMemory(&activity, &Device, sizeof(WDFDEVICE));
+	return activity;
+}

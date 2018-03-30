@@ -1,5 +1,4 @@
 #include "LearningKit.h"
-//#include "driver.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (INIT, DriverEntry)
@@ -83,20 +82,6 @@ VOID
 LearningKitKMDFEvtDriverContextCleanup(
     _In_ WDFOBJECT DriverObject
     )
-/*++
-Routine Description:
-
-    Free all the resources allocated in DriverEntry.
-
-Arguments:
-
-    DriverObject - handle to a WDF Driver object.
-
-Return Value:
-
-    VOID.
-
---*/
 {
     UNREFERENCED_PARAMETER(DriverObject);
 

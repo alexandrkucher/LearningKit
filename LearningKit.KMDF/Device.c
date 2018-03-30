@@ -127,9 +127,13 @@ Return Value:
 	PDEVICE_CONTEXT pDeviceContext;
 	WDF_USB_DEVICE_CREATE_CONFIG createParams;
 	WDF_USB_DEVICE_SELECT_CONFIG_PARAMS configParams;
+	WDF_USB_DEVICE_INFORMATION          deviceInfo;
+	ULONG                               waitWakeEnable;
 
 	UNREFERENCED_PARAMETER(ResourceList);
 	UNREFERENCED_PARAMETER(ResourceListTranslated);
+
+	waitWakeEnable = FALSE;
 
 	PAGED_CODE();
 
@@ -173,6 +177,60 @@ Return Value:
 		}
 	}
 
+
+	//
+	// Retrieve USBD version information, port driver capabilites and device
+	// capabilites such as speed, power, etc.
+	//
+	WDF_USB_DEVICE_INFORMATION_INIT(&deviceInfo);
+
+	status = WdfUsbTargetDeviceRetrieveInformation(
+		pDeviceContext->UsbDevice,
+		&deviceInfo);
+	if (NT_SUCCESS(status)) {
+		
+		waitWakeEnable = deviceInfo.Traits &
+			WDF_USB_DEVICE_TRAIT_REMOTE_WAKE_CAPABLE;
+
+		/*TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP,
+			"IsDeviceRemoteWakeable: %s\n",
+			waitWakeEnable ? "TRUE" : "FALSE");*/
+		//
+		// Save these for use later.
+		//
+		pDeviceContext->UsbDeviceTraits = deviceInfo.Traits;
+	}
+	else {
+		pDeviceContext->UsbDeviceTraits = 0;
+	}
+
+	status = SelectInterfaces(Device);
+	if (!NT_SUCCESS(status)) {
+		/*TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP,
+			"SelectInterfaces failed 0x%x\n", status);*/
+		return status;
+	}
+
+	//
+	// Enable wait-wake and idle timeout if the device supports it
+	//
+	if (waitWakeEnable) {
+		status = LearningKitSetPowerPolicy(Device);
+		if (!NT_SUCCESS(status)) {
+			/*TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP,
+				"OsrFxSetPowerPolicy failed  %!STATUS!\n", status);*/
+			return status;
+		}
+	}
+
+	status = OsrFxConfigContReaderForInterruptEndPoint(pDeviceContext);
+
+	/*TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "<-- EvtDevicePrepareHardware\n");*/
+
+	return status;
+
+
+	/*
 	//
 	// Select the first configuration of the device, using the first alternate
 	// setting of each interface
@@ -192,6 +250,179 @@ Return Value:
 	}
 
 	//TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+
+	return status;
+	*/
+}
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+LearningKitSetPowerPolicy(
+	_In_ WDFDEVICE Device
+)
+{
+	WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS idleSettings;
+	WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS wakeSettings;
+	NTSTATUS    status = STATUS_SUCCESS;
+
+	PAGED_CODE();
+
+	//
+	// Init the idle policy structure.
+	//
+	WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS_INIT(&idleSettings, IdleUsbSelectiveSuspend);
+	idleSettings.IdleTimeout = 10000; // 10-sec
+
+	status = WdfDeviceAssignS0IdleSettings(Device, &idleSettings);
+	if (!NT_SUCCESS(status)) {
+		/*TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP,
+			"WdfDeviceSetPowerPolicyS0IdlePolicy failed %x\n", status);*/
+		return status;
+	}
+
+	//
+	// Init wait-wake policy structure.
+	//
+	WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS_INIT(&wakeSettings);
+
+	status = WdfDeviceAssignSxWakeSettings(Device, &wakeSettings);
+	if (!NT_SUCCESS(status)) {
+	/*	TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP,
+			"WdfDeviceAssignSxWakeSettings failed %x\n", status);*/
+		return status;
+	}
+
+	return status;
+}
+
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+SelectInterfaces(
+	_In_ WDFDEVICE Device
+)
+/*++
+
+Routine Description:
+
+This helper routine selects the configuration, interface and
+creates a context for every pipe (end point) in that interface.
+
+Arguments:
+
+Device - Handle to a framework device
+
+Return Value:
+
+NT status value
+
+--*/
+{
+	WDF_USB_DEVICE_SELECT_CONFIG_PARAMS configParams;
+	NTSTATUS                            status = STATUS_SUCCESS;
+	PDEVICE_CONTEXT                     pDeviceContext;
+	WDFUSBPIPE                          pipe;
+	WDF_USB_PIPE_INFORMATION            pipeInfo;
+	UCHAR                               index;
+	UCHAR                               numberConfiguredPipes;
+
+	PAGED_CODE();
+
+	pDeviceContext = GetDeviceContext(Device);
+
+	WDF_USB_DEVICE_SELECT_CONFIG_PARAMS_INIT_SINGLE_INTERFACE(&configParams);
+
+	status = WdfUsbTargetDeviceSelectConfig(pDeviceContext->UsbDevice,
+		WDF_NO_OBJECT_ATTRIBUTES,
+		&configParams);
+	if (!NT_SUCCESS(status)) {
+
+	/*	TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP,
+			"WdfUsbTargetDeviceSelectConfig failed %!STATUS! \n",
+			status);*/
+
+		//
+		// Since the Osr USB fx2 device is capable of working at high speed, the only reason
+		// the device would not be working at high speed is if the port doesn't
+		// support it. If the port doesn't support high speed it is a 1.1 port
+		//
+		if ((pDeviceContext->UsbDeviceTraits & WDF_USB_DEVICE_TRAIT_AT_HIGH_SPEED) == 0) {
+			GUID activity = DeviceToActivityId(Device);
+
+			/*TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP,
+				" On a 1.1 USB port on Windows Vista"
+				" this is expected as the OSR USB Fx2 board's Interrupt EndPoint descriptor"
+				" doesn't conform to the USB specification. Windows Vista detects this and"
+				" returns an error. \n"
+			);*/
+			/*EventWriteSelectConfigFailure(
+				&activity,
+				pDeviceContext->DeviceName,
+				pDeviceContext->Location,
+				status
+			);*/
+		}
+
+		return status;
+	}
+
+	pDeviceContext->UsbInterface =
+		configParams.Types.SingleInterface.ConfiguredUsbInterface;
+
+	numberConfiguredPipes = configParams.Types.SingleInterface.NumberConfiguredPipes;
+
+	//
+	// Get pipe handles
+	//
+	for (index = 0; index < numberConfiguredPipes; index++) {
+
+		WDF_USB_PIPE_INFORMATION_INIT(&pipeInfo);
+
+		pipe = WdfUsbInterfaceGetConfiguredPipe(
+			pDeviceContext->UsbInterface,
+			index, //PipeIndex,
+			&pipeInfo
+		);
+		//
+		// Tell the framework that it's okay to read less than
+		// MaximumPacketSize
+		//
+		WdfUsbTargetPipeSetNoMaximumPacketSizeCheck(pipe);
+
+		if (WdfUsbPipeTypeInterrupt == pipeInfo.PipeType) {
+			/*TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL,
+				"Interrupt Pipe is 0x%p\n", pipe);*/
+			pDeviceContext->InterruptPipe = pipe;
+		}
+
+		//if (WdfUsbPipeTypeBulk == pipeInfo.PipeType &&
+		//	WdfUsbTargetPipeIsInEndpoint(pipe)) {
+		//	/*TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL,
+		//		"BulkInput Pipe is 0x%p\n", pipe);*/
+		//	pDeviceContext->BulkReadPipe = pipe;
+		//}
+
+		//if (WdfUsbPipeTypeBulk == pipeInfo.PipeType &&
+		//	WdfUsbTargetPipeIsOutEndpoint(pipe)) {
+		//	/*TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL,
+		//		"BulkOutput Pipe is 0x%p\n", pipe);*/
+		//	pDeviceContext->BulkWritePipe = pipe;
+		//}
+
+	}
+
+	//
+	// If we didn't find all the 3 pipes, fail the start.
+	//
+	if (!(/*pDeviceContext->BulkWritePipe
+		&& pDeviceContext->BulkReadPipe && */pDeviceContext->InterruptPipe)) {
+		status = STATUS_INVALID_DEVICE_STATE;
+	/*	TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP,
+			"Device is not configured properly %!STATUS!\n",
+			status);
+*/
+		return status;
+	}
 
 	return status;
 }
