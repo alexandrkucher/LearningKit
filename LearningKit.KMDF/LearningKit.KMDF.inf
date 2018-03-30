@@ -1,0 +1,87 @@
+;
+; LearningKit.KMDF.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=USBDevice
+ClassGuid={88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider=%ManufacturerName%
+CatalogFile=LearningKit.KMDF.cat
+DriverVer=
+
+[DestinationDirs]
+DefaultDestDir = 12
+LearningKit.KMDF_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+LearningKit.KMDF.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%LearningKit.KMDF.DeviceDesc%=LearningKit.KMDF_Device, USB\VID_vvvv&PID_pppp
+
+[LearningKit.KMDF_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+LearningKit.KMDF.sys
+
+[LearningKit.KMDF_Device.NT.HW]
+AddReg=LearningKit.KMDF_AddReg
+
+[LearningKit.KMDF_AddReg]
+; By default, USBDevice class uses iProduct descriptor to name the device in
+; Device Manager on Windows 8 and higher.
+; Uncomment for this device to use %DeviceName% on Windows 8 and higher:
+;HKR,,FriendlyName,,%LearningKit.KMDF.DeviceDesc%
+
+;-------------- Service installation
+[LearningKit.KMDF_Device.NT.Services]
+AddService = LearningKit.KMDF,%SPSVCINST_ASSOCSERVICE%, LearningKit.KMDF_Service_Inst
+
+; -------------- LearningKit.KMDF driver install sections
+[LearningKit.KMDF_Service_Inst]
+DisplayName    = %LearningKit.KMDF.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\LearningKit.KMDF.sys
+
+;
+;--- LearningKit.KMDF_Device Coinstaller installation ------
+;
+
+[LearningKit.KMDF_Device.NT.CoInstallers]
+AddReg=LearningKit.KMDF_Device_CoInstaller_AddReg
+CopyFiles=LearningKit.KMDF_Device_CoInstaller_CopyFiles
+
+[LearningKit.KMDF_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[LearningKit.KMDF_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[LearningKit.KMDF_Device.NT.Wdf]
+KmdfService =  LearningKit.KMDF, LearningKit.KMDF_wdfsect
+[LearningKit.KMDF_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Universal Serial Bus devices"
+DiskName = "LearningKit.KMDF Installation Disk"
+LearningKit.KMDF.DeviceDesc = "LearningKit.KMDF Device"
+LearningKit.KMDF.SVCDESC = "LearningKit.KMDF Service"
+REG_MULTI_SZ = 0x00010000
