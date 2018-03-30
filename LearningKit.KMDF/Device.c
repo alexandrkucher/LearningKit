@@ -1,5 +1,5 @@
-#include "driver.h"
-#include "device.tmh"
+#include "LearningKit.h"
+//#include "device.tmh"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, LearningKitKMDFEvtDevicePrepareHardware)
@@ -35,6 +35,7 @@ LearningKitKMDFEvtDeviceAdd(
 	NTSTATUS status;
 
 	WDF_PNPPOWER_EVENT_CALLBACKS pnpPowerCallbacks;
+	WDF_DEVICE_PNP_CAPABILITIES pnpCaps;
 	WDF_OBJECT_ATTRIBUTES   deviceAttributes;
 	PDEVICE_CONTEXT deviceContext;
 	WDFDEVICE device;
@@ -49,11 +50,23 @@ LearningKitKMDFEvtDeviceAdd(
 
 	WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
+	WdfDeviceInitSetIoType(DeviceInit, WdfDeviceIoBuffered);
+
 	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
 
 	status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
 
 	if (NT_SUCCESS(status)) {
+
+		//
+		// Tell the framework to set the SurpriseRemovalOK in the DeviceCaps so
+		// that you don't get the popup in usermode when you surprise remove the device.
+		//
+		WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCaps);
+		pnpCaps.SurpriseRemovalOK = WdfTrue;
+
+		WdfDeviceSetPnpCapabilities(device, &pnpCaps);
+
 		//
 		// Get a pointer to the device context structure that we just associated
 		// with the device object. We define this structure in the device.h

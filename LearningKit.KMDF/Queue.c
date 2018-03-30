@@ -1,21 +1,4 @@
-/*++
-
-Module Name:
-
-    queue.c
-
-Abstract:
-
-    This file contains the queue entry points and callbacks.
-
-Environment:
-
-    Kernel-mode Driver Framework
-
---*/
-
-#include "driver.h"
-#include "queue.tmh"
+#include "LearningKit.h"
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, LearningKitKMDFQueueInitialize)
@@ -74,7 +57,7 @@ Return Value:
                  );
 
     if( !NT_SUCCESS(status) ) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
+        //TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
         return status;
     }
 
@@ -114,10 +97,10 @@ Return Value:
 
 --*/
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
+  /*  TraceEvents(TRACE_LEVEL_INFORMATION, 
                 TRACE_QUEUE, 
                 "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d", 
-                Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);
+                Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);*/
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
 
@@ -153,11 +136,11 @@ Return Value:
 
 --*/
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
+    /*TraceEvents(TRACE_LEVEL_INFORMATION, 
                 TRACE_QUEUE, 
                 "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d", 
                 Queue, Request, ActionFlags);
-
+*/
     //
     // In most cases, the EvtIoStop callback function completes, cancels, or postpones
     // further processing of the I/O request.

@@ -36,7 +36,6 @@ LearningKitKMDFQueueInitialize(
 //
 // Events from the IoQueue object
 //
-EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL LearningKitKMDFEvtIoDeviceControl;
-EVT_WDF_IO_QUEUE_IO_STOP LearningKitKMDFEvtIoStop;
+
 
 EXTERN_C_END

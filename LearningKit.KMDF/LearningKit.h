@@ -1,7 +1,10 @@
-#pragma once
 
-
+#include <initguid.h>
 #include <ntddk.h>
+#include "usbdi.h"
+#include "usbdlib.h"
+#include "public.h"
+#include "driverspecs.h"
 #include <wdf.h>
 #include <wdfusb.h>
 
@@ -37,8 +40,22 @@ typedef struct _DEVICE_CONTEXT {
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, GetDeviceContext)
 
 EXTERN_C_START
+
+DRIVER_INITIALIZE DriverEntry;
+EVT_WDF_DRIVER_DEVICE_ADD LearningKitKMDFEvtDeviceAdd;
+EVT_WDF_OBJECT_CONTEXT_CLEANUP LearningKitKMDFEvtDriverContextCleanup;
+
 EVT_WDF_DEVICE_D0_ENTRY LearningKitKMDFEvtDeviceD0Entry;
 EVT_WDF_DEVICE_D0_EXIT LearningKitKMDFEvtDeviceD0Exit;
 EVT_WDF_DRIVER_DEVICE_ADD LearningKitKMDFEvtDeviceAdd;
 EVT_WDF_DEVICE_PREPARE_HARDWARE LearningKitKMDFEvtDevicePrepareHardware;
+
+EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL LearningKitKMDFEvtIoDeviceControl;
+EVT_WDF_IO_QUEUE_IO_STOP LearningKitKMDFEvtIoStop;
+
+NTSTATUS
+LearningKitKMDFQueueInitialize(
+	_In_ WDFDEVICE Device
+);
+
 EXTERN_C_END
