@@ -1,7 +1,7 @@
 #include "LearningKit.h"
 
 VOID
-OsrUsbIoctlGetInterruptMessage(
+LearningKitIoctlGetInterruptMessage(
 	_In_ WDFDEVICE Device,
 	_In_ NTSTATUS  ReaderStatus
 )

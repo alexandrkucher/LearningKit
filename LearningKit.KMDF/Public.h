@@ -57,4 +57,89 @@ typedef struct _SWITCH_STATE {
 
 
 }SWITCH_STATE, *PSWITCH_STATE;
+
+typedef struct _BAR_GRAPH_STATE {
+
+	union {
+
+		struct {
+			//
+			// Individual bars starting from the 
+			//  top of the stack of bars 
+			//
+			// NOTE: There are actually 10 bars, 
+			//  but the very top two do not light
+			//  and are not counted here
+			//
+			UCHAR Bar1 : 1;
+			UCHAR Bar2 : 1;
+			UCHAR Bar3 : 1;
+			UCHAR Bar4 : 1;
+			UCHAR Bar5 : 1;
+			UCHAR Bar6 : 1;
+			UCHAR Bar7 : 1;
+			UCHAR Bar8 : 1;
+		};
+
+		//
+		// The state of all the bar graph as a single
+		// UCHAR
+		//
+		UCHAR BarsAsUChar;
+
+	};
+
+}BAR_GRAPH_STATE, *PBAR_GRAPH_STATE;
+
+#define IOCTL_INDEX             0x800
+#define FILE_DEVICE_OSRUSBFX2   65500U
+
+#define IOCTL_OSRUSBFX2_GET_CONFIG_DESCRIPTOR CTL_CODE(FILE_DEVICE_OSRUSBFX2,     \
+                                                     IOCTL_INDEX,     \
+                                                     METHOD_BUFFERED,         \
+                                                     FILE_READ_ACCESS)
+
+#define IOCTL_OSRUSBFX2_RESET_DEVICE  CTL_CODE(FILE_DEVICE_OSRUSBFX2,     \
+                                                     IOCTL_INDEX + 1, \
+                                                     METHOD_BUFFERED,         \
+                                                     FILE_WRITE_ACCESS)
+
+#define IOCTL_OSRUSBFX2_REENUMERATE_DEVICE  CTL_CODE(FILE_DEVICE_OSRUSBFX2, \
+                                                    IOCTL_INDEX  + 3,  \
+                                                    METHOD_BUFFERED, \
+                                                    FILE_WRITE_ACCESS)
+
+#define IOCTL_OSRUSBFX2_GET_BAR_GRAPH_DISPLAY CTL_CODE(FILE_DEVICE_OSRUSBFX2,\
+                                                    IOCTL_INDEX  + 4, \
+                                                    METHOD_BUFFERED, \
+                                                    FILE_READ_ACCESS)
+
+
+#define IOCTL_OSRUSBFX2_SET_BAR_GRAPH_DISPLAY CTL_CODE(FILE_DEVICE_OSRUSBFX2,\
+                                                    IOCTL_INDEX + 5, \
+                                                    METHOD_BUFFERED, \
+                                                    FILE_WRITE_ACCESS)
+
+
+#define IOCTL_OSRUSBFX2_READ_SWITCHES   CTL_CODE(FILE_DEVICE_OSRUSBFX2, \
+                                                    IOCTL_INDEX + 6, \
+                                                    METHOD_BUFFERED, \
+                                                    FILE_READ_ACCESS)
+
+
+#define IOCTL_OSRUSBFX2_GET_7_SEGMENT_DISPLAY CTL_CODE(FILE_DEVICE_OSRUSBFX2, \
+                                                    IOCTL_INDEX + 7, \
+                                                    METHOD_BUFFERED, \
+                                                    FILE_READ_ACCESS)
+
+
+#define IOCTL_OSRUSBFX2_SET_7_SEGMENT_DISPLAY CTL_CODE(FILE_DEVICE_OSRUSBFX2, \
+                                                    IOCTL_INDEX + 8, \
+                                                    METHOD_BUFFERED, \
+                                                    FILE_WRITE_ACCESS)
+
+#define IOCTL_OSRUSBFX2_GET_INTERRUPT_MESSAGE CTL_CODE(FILE_DEVICE_OSRUSBFX2,\
+                                                    IOCTL_INDEX + 9, \
+                                                    METHOD_OUT_DIRECT, \
+                                                    FILE_READ_ACCESS)
 #endif

@@ -2,7 +2,7 @@
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-OsrFxConfigContReaderForInterruptEndPoint(
+LearningKitConfigContReaderForInterruptEndPoint(
 	_In_ PDEVICE_CONTEXT DeviceContext
 )
 /*++
@@ -25,7 +25,7 @@ NT status value
 	NTSTATUS status;
 
 	WDF_USB_CONTINUOUS_READER_CONFIG_INIT(&contReaderConfig,
-		OsrFxEvtUsbInterruptPipeReadComplete,
+		LearningKitEvtUsbInterruptPipeReadComplete,
 		DeviceContext,    // Context
 		sizeof(UCHAR));   // TransferLength
 
@@ -71,13 +71,13 @@ OsrFxEvtUsbInterruptReadersFailed(
 	//
 	// Service the pending interrupt switch change request
 	//
-	OsrUsbIoctlGetInterruptMessage(device, Status);
+	LearningKitIoctlGetInterruptMessage(device, Status);
 
 	return TRUE;
 }
 
 VOID
-OsrFxEvtUsbInterruptPipeReadComplete(
+LearningKitEvtUsbInterruptPipeReadComplete(
 	WDFUSBPIPE  Pipe,
 	WDFMEMORY   Buffer,
 	size_t      NumBytesTransferred,
@@ -149,6 +149,6 @@ NT status value
 	// for your driver, then you could handle this condition by maintaining a
 	// state variable on D0Entry to track interrupt messages caused by power up.
 	//
-	OsrUsbIoctlGetInterruptMessage(device, STATUS_SUCCESS);
+	LearningKitIoctlGetInterruptMessage(device, STATUS_SUCCESS);
 
 }

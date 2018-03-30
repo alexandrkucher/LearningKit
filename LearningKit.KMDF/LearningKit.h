@@ -8,6 +8,19 @@
 #include <wdf.h>
 #include <wdfusb.h>
 
+extern const __declspec(selectany) LONGLONG DEFAULT_CONTROL_TRANSFER_TIMEOUT = 5 * -1 * WDF_TIMEOUT_TO_SEC;
+
+//
+// Define the vendor commands supported by our device
+//
+#define USBFX2LK_READ_7SEGMENT_DISPLAY      0xD4
+#define USBFX2LK_READ_SWITCHES              0xD6
+#define USBFX2LK_READ_BARGRAPH_DISPLAY      0xD7
+#define USBFX2LK_SET_BARGRAPH_DISPLAY       0xD8
+#define USBFX2LK_IS_HIGH_SPEED              0xD9
+#define USBFX2LK_REENUMERATE                0xDA
+#define USBFX2LK_SET_7SEGMENT_DISPLAY       0xDB
+
 typedef struct _DEVICE_CONTEXT {
 
 	WDFUSBDEVICE                    UsbDevice;
@@ -72,17 +85,74 @@ SelectInterfaces(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-OsrFxConfigContReaderForInterruptEndPoint(
+LearningKitConfigContReaderForInterruptEndPoint(
 	_In_ PDEVICE_CONTEXT DeviceContext
 );
 
-EVT_WDF_USB_READER_COMPLETION_ROUTINE OsrFxEvtUsbInterruptPipeReadComplete;
+EVT_WDF_USB_READER_COMPLETION_ROUTINE LearningKitEvtUsbInterruptPipeReadComplete;
 EVT_WDF_USB_READERS_FAILED OsrFxEvtUsbInterruptReadersFailed;
 
 VOID
-OsrUsbIoctlGetInterruptMessage(
+LearningKitIoctlGetInterruptMessage(
 	_In_ WDFDEVICE Device,
 	_In_ NTSTATUS ReaderStatus
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+ResetDevice(
+	_In_ WDFDEVICE Device
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+ReenumerateDevice(
+	_In_ PDEVICE_CONTEXT DevContext
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+GetBarGraphState(
+	_In_ PDEVICE_CONTEXT DevContext,
+	_Out_ PBAR_GRAPH_STATE BarGraphState
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+SetBarGraphState(
+	_In_ PDEVICE_CONTEXT DevContext,
+	_In_ PBAR_GRAPH_STATE BarGraphState
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+GetSevenSegmentState(
+	_In_ PDEVICE_CONTEXT DevContext,
+	_Out_ PUCHAR SevenSegment
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+SetSevenSegmentState(
+	_In_ PDEVICE_CONTEXT DevContext,
+	_In_ PUCHAR SevenSegment
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+GetSwitchState(
+	_In_ PDEVICE_CONTEXT DevContext,
+	_In_ PSWITCH_STATE SwitchState
+);
+
+VOID
+StopAllPipes(
+	IN PDEVICE_CONTEXT DeviceContext
+);
+
+NTSTATUS
+StartAllPipes(
+	IN PDEVICE_CONTEXT DeviceContext
 );
 
 EXTERN_C_END
