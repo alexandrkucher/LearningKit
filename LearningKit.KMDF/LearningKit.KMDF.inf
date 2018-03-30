@@ -29,7 +29,7 @@ WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with
 %ManufacturerName%=Standard,NT$ARCH$
 
 [Standard.NT$ARCH$]
-%LearningKit.KMDF.DeviceDesc%=LearningKit.KMDF_Device, USB\VID_vvvv&PID_pppp
+%LearningKit.KMDF.DeviceDesc%=LearningKit.KMDF_Device, USB\VID_0547&PID_1002
 
 [LearningKit.KMDF_Device.NT]
 CopyFiles=Drivers_Dir
@@ -79,7 +79,7 @@ KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
 SPSVCINST_ASSOCSERVICE= 0x00000002
-ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ManufacturerName="Alex manufacturer" ;TODO: Replace with your manufacturer name
 ClassName="Universal Serial Bus devices"
 DiskName = "LearningKit.KMDF Installation Disk"
 LearningKit.KMDF.DeviceDesc = "LearningKit.KMDF Device"

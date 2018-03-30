@@ -90,7 +90,7 @@ LearningKitConfigContReaderForInterruptEndPoint(
 );
 
 EVT_WDF_USB_READER_COMPLETION_ROUTINE LearningKitEvtUsbInterruptPipeReadComplete;
-EVT_WDF_USB_READERS_FAILED OsrFxEvtUsbInterruptReadersFailed;
+EVT_WDF_USB_READERS_FAILED LearningKitEvtUsbInterruptReadersFailed;
 
 VOID
 LearningKitIoctlGetInterruptMessage(

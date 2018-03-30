@@ -29,7 +29,7 @@ NT status value
 		DeviceContext,    // Context
 		sizeof(UCHAR));   // TransferLength
 
-	contReaderConfig.EvtUsbTargetPipeReadersFailed = OsrFxEvtUsbInterruptReadersFailed;
+	contReaderConfig.EvtUsbTargetPipeReadersFailed = LearningKitEvtUsbInterruptReadersFailed;
 
 	//
 	// Reader requests are not posted to the target automatically.
@@ -52,7 +52,7 @@ NT status value
 }
 
 BOOLEAN
-OsrFxEvtUsbInterruptReadersFailed(
+LearningKitEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
 	_In_ NTSTATUS Status,
 	_In_ USBD_STATUS UsbdStatus
