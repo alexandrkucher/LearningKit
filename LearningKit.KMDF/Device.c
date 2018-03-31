@@ -39,6 +39,7 @@ LearningKitKMDFEvtDeviceAdd(
 	WDF_OBJECT_ATTRIBUTES   deviceAttributes;
 	PDEVICE_CONTEXT deviceContext;
 	WDFDEVICE device;
+	WDF_OBJECT_ATTRIBUTES attributes;
 
 	PAGED_CODE();
 
@@ -81,6 +82,21 @@ LearningKitKMDFEvtDeviceAdd(
 			// Initialize the I/O Package and any Queues
 			//
 			status = LearningKitKMDFQueueInitialize(device);
+		}
+
+		//
+		// Create the lock that we use to serialize calls to ResetDevice(). As an
+		// alternative to using a WDFWAITLOCK to serialize the calls, a sequential
+		// WDFQUEUE can be created and reset IOCTLs would be forwarded to it.
+		//
+		WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+		attributes.ParentObject = device;
+
+		status = WdfWaitLockCreate(&attributes, &deviceContext->ResetDeviceWaitLock);
+		if (!NT_SUCCESS(status)) {
+			/*TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP,
+				"WdfWaitLockCreate failed  %!STATUS!\n", status);*/
+			return status;
 		}
 	}
 
