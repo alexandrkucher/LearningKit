@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;LEARNINGKITLIB_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\projects\Drivers\LearningKit\LearningKit.KMDF;C:\Program Files %28x86%29\Windows Kits\10\Lib\10.0.16299.0\km;..\inc;..\sys\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Include;..\inc;..\sys\inc</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -150,6 +150,7 @@
     <ClInclude Include="LearningKitInterface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DeviceInterop.c" />
     <ClCompile Include="LearningKitInterface.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

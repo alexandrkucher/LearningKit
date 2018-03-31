@@ -14,6 +14,7 @@ Environment:
     user and kernel
 
 --*/
+#pragma once
 
 #ifndef _PUBLIC_H
 #define _PUBLIC_H
