@@ -147,9 +147,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="LearningKitInterface.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="DeviceInterop.c" />
     <ClCompile Include="LearningKitInterface.c" />
   </ItemGroup>

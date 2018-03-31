@@ -325,25 +325,7 @@ PlayWithDevice()
 
 			break;
 
-		case LIGHT_ALL_BARS:
-
-			barGraphState.BarsAsUChar = 0xFF;
-
-			if (!DeviceIoControl(deviceHandle,
-				IOCTL_OSRUSBFX2_SET_BAR_GRAPH_DISPLAY,
-				&barGraphState,         // Ptr to InBuffer
-				sizeof(BAR_GRAPH_STATE),   // Length of InBuffer
-				NULL,         // Ptr to OutBuffer
-				0,            // Length of OutBuffer
-				&index,       // BytesReturned
-				0)) {          // Ptr to Overlapped structure
-
-				code = GetLastError();
-
-				printf("DeviceIoControl failed with error 0x%x\n", code);
-
-				goto Error;
-			}
+		case LIGHT_ALL_BARS:			
 
 			break;
 
@@ -468,30 +450,10 @@ PlayWithDevice()
 
 		case GET_7_SEGEMENT_STATE:
 
-			sevenSegment = 0;
-
-			if (!DeviceIoControl(deviceHandle,
-				IOCTL_OSRUSBFX2_GET_7_SEGMENT_DISPLAY,
-				NULL,             // Ptr to InBuffer
-				0,            // Length of InBuffer
-				&sevenSegment,                 // Ptr to OutBuffer
-				sizeof(UCHAR),         // Length of OutBuffer
-				&index,                     // BytesReturned
-				0)) {                       // Ptr to Overlapped structure
-
-				code = GetLastError();
-
-				printf("DeviceIoControl failed with error 0x%x\n", code);
-
-				goto Error;
-			}
-
 			printf("7 Segment mask:  0x%x\n", sevenSegment);
 			break;
 
-		case SET_7_SEGEMENT_STATE:
-
-			
+		case SET_7_SEGEMENT_STATE:		
 
 			printf("7 Segment mask:  0x%x\n", sevenSegment);
 			break;
