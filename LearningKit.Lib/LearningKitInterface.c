@@ -108,3 +108,55 @@ KIT_BAR GetLightBars()
 
 	return result ? (KIT_BAR)bars : Undefined;
 }
+
+KIT_SWITCHES GetSwitches()
+{
+	HANDLE deviceHandle;
+	ULONG returnedBytes;
+
+	deviceHandle = OpenDevice(FALSE);
+	if (deviceHandle == INVALID_HANDLE_VALUE) {
+		return FALSE;
+	}
+
+	UCHAR switchState = 0;
+
+	_Bool result = DeviceIoControl(deviceHandle,
+		IOCTL_OSRUSBFX2_READ_SWITCHES,
+		NULL,             // Ptr to InBuffer
+		0,            // Length of InBuffer
+		&switchState,           // Ptr to OutBuffer
+		sizeof(switchState),    // Length of OutBuffer
+		&returnedBytes,                // BytesReturned
+		0);
+
+	CloseHandle(deviceHandle);
+
+	return (KIT_SWITCHES)switchState;
+}
+
+KIT_SWITCHES GetSwitchesInterrupt()
+{
+	HANDLE deviceHandle;
+	ULONG returnedBytes;
+
+	deviceHandle = OpenDevice(FALSE);
+	if (deviceHandle == INVALID_HANDLE_VALUE) {
+		return FALSE;
+	}
+
+	UCHAR switchState = 0;
+
+	_Bool result = DeviceIoControl(deviceHandle,
+		IOCTL_OSRUSBFX2_GET_INTERRUPT_MESSAGE,
+		NULL,             // Ptr to InBuffer
+		0,            // Length of InBuffer
+		&switchState,           // Ptr to OutBuffer
+		sizeof(switchState),    // Length of OutBuffer
+		&returnedBytes,                // BytesReturned
+		0);
+
+	CloseHandle(deviceHandle);
+
+	return (KIT_SWITCHES)switchState;
+}
